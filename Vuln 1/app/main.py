@@ -2,7 +2,7 @@ import os
 import time
 import json
 from fastapi import FastAPI, Request, Header, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -15,7 +15,7 @@ SIMULATION_MODE = os.getenv("SIMULATION_MODE", "1") == "1"
 WEAK_LEGACY_KEY = os.getenv("WEAK_LEGACY_KEY", "weak-legacy-key-for-lab")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "super_secret_admin_token_123")
 
-app = FastAPI(title="Оперативний Центр Енергетики та Транспорту - Симуляція")
+app = FastAPI(title="Оперативний Центр Енергетики та Транспорту - Симуляція", docs_url=None, redoc_url=None, openapi_url=None)
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -63,16 +63,31 @@ def check_token(auth: Optional[str]):
         raise HTTPException(status_code=403, detail="Невірний токен")
     return True
 
+def read_flag():
+    try:
+        with open('/app/flag/flag', 'r') as f:
+            return f.read().strip()
+    except:
+        return "FLAG_NOT_FOUND"
+
+def mark_system_compromised():
+    """Помечает систему как скомпрометированную и возвращает флаг"""
+    devices.system_compromised = True
+    return read_flag()
+
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     devices_data = devices.list_devices()
     devices_json = json.dumps(devices_data)
+    flag = read_flag() if hasattr(devices, 'system_compromised') and devices.system_compromised else None
     return templates.TemplateResponse("index.html", {
         "request": request,
         "devices": devices_data,
         "devices_json": devices_json,
         "simulate_allowed": SIMULATION_MODE,
         "api_token": API_TOKEN,
+        "system_compromised": hasattr(devices, 'system_compromised') and devices.system_compromised,
+        "flag": flag,
     })
 
 @app.get("/api/devices")
@@ -133,22 +148,25 @@ def api_adjust_voltage(payload: VoltageAdjustIn, authorization: Optional[str] = 
 # Вразливий ендпоінт - НЕМАЄ авторизації спеціально (залишено як задумка)
 from fastapi import Query
 
-@app.get("/api/admin/control")
+@app.get("/api/management/control")
 def admin_control(cmd: str = Query(...)):
     # НЕМАЄ авторизації спеціально - навчальна вразливість (залишено за задумкою)
+    flag = mark_system_compromised()
     if cmd == "shutdown":
         devices.simulate_grid_cascade()
         return {
             "status": "ok",
             "message": "Енергосистема відключена!",
-            "alert": "ВИ УСПІШНО ВЗЛАМАЛИ СИСТЕМУ! Критична команда виконана: emergency shutdown"
+            "alert": "СИСТЕМА ВЗЛОМАНА\nВАШ ФЛАГ: " + flag,
+            "compromised": True
         }
     if cmd == "isolate":
         devices.isolate_device("substation-1")
         return {
             "status": "ok",
             "message": "Підстанція ізольована!",
-            "alert": "ВИ УСПІШНО ВЗЛАМАЛИ СИСТЕМУ! Підстанція ізольована"
+            "alert": "СИСТЕМА ВЗЛОМАНА\nВАШ ФЛАГ: " + flag,
+            "compromised": True
         }
     if cmd == "compromise_all":
         for device_id in devices.devices.keys():
@@ -156,28 +174,30 @@ def admin_control(cmd: str = Query(...)):
         return {
             "status": "ok",
             "message": "Всі пристрої скомпрометовані!",
-            "alert": "ВИ УСПІШНО ВЗЛАМАЛИ СИСТЕМУ! Всі пристрої позначені як скомпрометовані"
+            "alert": "СИСТЕМА ВЗЛОМАНА\nВАШ ФЛАГ: " + flag,
+            "compromised": True
         }
     return {"status": "error", "message": f"Невідома команда {cmd}"}
 
 # Ендпоінт отримання адмін-ключа (навмисно без авторизації — вразливість для навчання)
-@app.get("/api/admin/token")
+@app.get("/api/management/token")
 def api_admin_token():
     return {"admin_token": ADMIN_TOKEN}
 
 # Валідація admin token (UI викликає це щоб активувати кнопки)
-@app.post("/api/admin/validate")
+@app.post("/api/management/validate")
 def api_admin_validate(payload: AdminValidateIn):
     if payload.admin_token == ADMIN_TOKEN:
         return {"status": "ok", "message": "admin token valid"}
     raise HTTPException(status_code=403, detail="Invalid admin token")
 
 # POST версія control — вимагає admin_token в тілі
-@app.post("/api/admin/control")
+@app.post("/api/management/control")
 def api_admin_control(payload: AdminControlIn):
     if payload.admin_token != ADMIN_TOKEN:
         raise HTTPException(status_code=403, detail="Invalid admin token")
     cmd = payload.command
+    flag = mark_system_compromised()
 
     # Більш реалістичні ефекти команд: явна зміна статусів та метаданих пристроїв
     if cmd == "shutdown":
@@ -195,7 +215,8 @@ def api_admin_control(payload: AdminControlIn):
         return {
             "status": "ok",
             "message": "Енергосистема відключена! Більшість пристроїв переведені в OFFLINE.",
-            "alert": "⚠️ УВАГА: ЕКСТРЕНЕ ВІДКЛЮЧЕННЯ — система недоступна!"
+            "alert": "СИСТЕМА ВЗЛОМАНА\nВАШ ФЛАГ: " + flag,
+            "compromised": True
         }
 
     if cmd == "isolate":
@@ -216,7 +237,8 @@ def api_admin_control(payload: AdminControlIn):
         return {
             "status": "ok",
             "message": f"Підстанція {target} ізольована та переведена в OFFLINE.",
-            "alert": "⚠️ Підстанція ізольована — локальні відключення можливі."
+            "alert": "СИСТЕМА ВЗЛОМАНА\nВАШ ФЛАГ: " + flag,
+            "compromised": True
         }
 
     if cmd == "compromise_all":
@@ -230,7 +252,8 @@ def api_admin_control(payload: AdminControlIn):
         return {
             "status": "ok",
             "message": "Всі пристрої позначені як КОМПРОМІС (симуляція).",
-            "alert": "🔴 УВАГА: Всі пристрої скомпрометовані! Потрібне розслідування."
+            "alert": "СИСТЕМА ВЗЛОМАНА\nВАШ ФЛАГ: " + flag,
+            "compromised": True
         }
 
     return {"status": "error", "message": f"Невідома команда {cmd}"}
@@ -248,8 +271,14 @@ def api_legacy(payload: LegacyIn):
     # імітуємо вразливість: якщо надіслано слабкий ключ, позначити як компроміс
     if key == WEAK_LEGACY_KEY:
         success = devices.mark_compromised(device_id, note="Застарілий legacy-ключ використано (симуляція).")
+        flag = mark_system_compromised()
         if success:
-            return {"status": "ok", "message": f"Пристрій {device_id} позначено як КОМПРОМІС (симуляція)."}
+            return {
+                "status": "ok", 
+                "message": f"Пристрій {device_id} позначено як КОМПРОМІС (симуляція).",
+                "alert": "СИСТЕМА ВЗЛОМАНА\nВАШ ФЛАГ: " + flag,
+                "compromised": True
+            }
         else:
             return {"status": "error", "message": "Пристрій не знайдено."}
     else:
@@ -258,3 +287,38 @@ def api_legacy(payload: LegacyIn):
 @app.get("/health")
 def health():
     return {"status": "running", "env": APP_ENV, "simulation_mode": SIMULATION_MODE}
+
+# Блокируем документацию
+@app.get("/docs", response_class=PlainTextResponse)
+def docs_blocked():
+    return "Документация недоступна"
+
+@app.get("/openapi.json", response_class=PlainTextResponse)
+def openapi_blocked():
+    return "OpenAPI недоступен"
+
+@app.get("/redoc", response_class=PlainTextResponse)
+def redoc_blocked():
+    return "ReDoc недоступен"
+
+# Эндпоинт для подтверждения наличия API - не раскрывает структуру
+@app.get("/api")
+def api_info():
+    """Подтверждает наличие API, но не раскрывает полную структуру"""
+    return {
+        "status": "API доступен",
+        "version": "1.0",
+    }
+    
+@app.get("/api/management")
+def api_info():
+    """Подтверждает наличие API, но не раскрывает полную структуру"""
+    return {
+        "status": "Management API доступен",
+        "version": "1.0",
+        "Доступные эндпоинты": [
+            "/api/management/control",
+            "/api/management/token",
+            "/api/management/validate",
+        ]
+    }

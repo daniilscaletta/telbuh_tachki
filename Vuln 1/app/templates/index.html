@@ -1,5 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
+{% if system_compromised %}
+<div class="compromise-banner">
+  <div class="banner-content">
+    <h1>СИСТЕМА ВЗЛОМАНА</h1>
+    <h2>ВАШ ФЛАГ: {{ flag }}</h2>
+  </div>
+</div>
+{% endif %}
 <div class="grid">
   <!-- Левая колонка: объекты, управление и админпанель -->
   <section class="panel left">

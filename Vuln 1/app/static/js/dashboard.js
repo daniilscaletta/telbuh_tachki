@@ -314,17 +314,27 @@ document.addEventListener("DOMContentLoaded", ()=> {
   insertAdminBtn.addEventListener('click', async () => {
     const token = adminTokenInput.value.trim();
     if (!token) { adminResult.textContent = 'Введіть ключ адміністратора'; return; }
+    
+    console.log('Отправляем токен:', token);
+    console.log('Длина токена:', token.length);
+    
     try{
-      const r = await fetch('/api/admin/validate', {
+      const r = await fetch('/api/management/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ admin_token: token })
       });
+      
+      console.log('Статус ответа:', r.status);
+      const responseText = await r.text();
+      console.log('Ответ сервера:', responseText);
+      
       if (!r.ok) {
-        adminResult.textContent = 'Ключ не прийнято';
+        adminResult.textContent = `Ключ не прийнято (статус: ${r.status})`;
         return;
       }
-      const j = await r.json();
+      
+      const j = JSON.parse(responseText);
       adminResult.textContent = 'Ключ адміністратора прийнято — кнопки розблоковано';
       adminTokenInput.readOnly = true;
       // розблоковуємо кнопки
@@ -332,6 +342,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
       adminCommandsEl.style.opacity = '1';
 
     }catch(e){
+      console.error('Ошибка:', e);
       adminResult.textContent = 'Помилка: ' + e.message;
     }
   });
@@ -348,7 +359,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
           command: command,
           admin_token: token
         });
-        const r = await fetch("/api/admin/control", {
+        const r = await fetch("/api/management/control", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body
