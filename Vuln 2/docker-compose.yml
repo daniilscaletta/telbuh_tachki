@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  ukr-energy-system:
+  est-energy-system:
     build: .
-    container_name: ukr-energy-system-container
+    container_name: est-energy-system-container
     ports:
       - "9000:9000"
     environment:
@@ -11,10 +11,11 @@ services:
       - PORT=9000
       - DEBUG=False
       - DATABASE_URL=energy_system.db
-      - SECRET_KEY=ukr_energy_system_2024_secret_key
+      - SECRET_KEY=est_energy_system_secret_key
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
+      - ./app/flag/flag:/app/flag/flag:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
@@ -23,9 +24,9 @@ services:
       retries: 3
       start_period: 40s
     labels:
-      - "com.docker.compose.project=ukr-energy-system"
-      - "com.docker.compose.service=ukr-energy-system"
+      - "com.docker.compose.project=est-energy-system"
+      - "com.docker.compose.service=est-energy-system"
 
 networks:
   default:
-    name: ukr-energy-network
+    name: est-energy-network

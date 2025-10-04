@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from app.database.database import DatabaseManager
+from app.database.database import DatabaseManager, read_flag
+import os
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -31,10 +32,12 @@ async def search_stations(
         flag_found = False
         flag_value = None
         
+        system_flag = read_flag()
+        
         for result in results:
-            if len(result) > 1 and isinstance(result[1], str) and "EST_ENERGY_SYSTEM_2024" in str(result[1]):
+            if len(result) > 1 and isinstance(result[1], str) and system_flag in str(result[1]):
                 flag_found = True
-                flag_value = "EST_ENERGY_SYSTEM_2024"
+                flag_value = system_flag
                 break
         
         return templates.TemplateResponse("search_results.html", {

@@ -19,7 +19,7 @@ python demo_sqli.py
 
 ## 🎯 Goal
 
-**Get the flag:** `EST_ENERGY_SYSTEM_2024`
+**Get the flag:** `poligon{e5t_3n3r6y_5Y57eM_2025}`
 
 ## 📚 Learning Resources
 

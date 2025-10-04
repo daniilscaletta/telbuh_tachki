@@ -3,6 +3,12 @@ import os
 from typing import List, Tuple, Optional
 from app.models.energy_models import PowerStation, EnergyConsumption, SystemAlert
 
+def read_flag():
+    """Читает флаг из файла"""
+    flag_file_path = "/app/flag/flag"
+    with open(flag_file_path, 'r') as f:
+        return f.read().strip()
+
 class DatabaseManager:
     """Менеджер базы данных для системы управления энергосистемой"""
     
@@ -121,10 +127,11 @@ class DatabaseManager:
             ''', alert)
         
         # System Flag
+        system_flag = read_flag()
         cursor.execute('''
             INSERT OR IGNORE INTO system_flags (flag_name, flag_value, description)
             VALUES (?, ?, ?)
-        ''', ("TASK_COMPLETED", "EST_ENERGY_SYSTEM_2024", "Estonian Energy System Management Task Completion Flag"))
+        ''', ("TASK_COMPLETED", system_flag, "Estonian Energy System Management Task Completion Flag"))
     
     def get_all_stations(self) -> List[Tuple]:
         """Получить все электростанции"""

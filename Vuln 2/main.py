@@ -14,13 +14,6 @@ from config.settings import settings
 
 if __name__ == "__main__":
     import uvicorn
-    print(f"🚀 Запуск {settings.APP_NAME} v{settings.APP_VERSION}")
-    print(f"📍 Сервер: http://{settings.HOST}:{settings.PORT}")
-    print(f"🔧 Debug режим: {'Включен' if settings.DEBUG else 'Выключен'}")
-    print("⚠️  ВНИМАНИЕ: Это демонстрационный проект с учебными уязвимостями!")
-    print("🔓 Для получения флага используйте SQL injection уязвимость")
-    print("📖 Инструкция: http://localhost:9000/search")
-    print("=" * 60)
     
     uvicorn.run(
         "app.main:app",
