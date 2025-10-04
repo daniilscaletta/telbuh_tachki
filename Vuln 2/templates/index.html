@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+            <h1 class="display-4">
+                <i class="fas fa-bolt"></i> Estonia Energy System Management
+            </h1>
+            <p class="lead">Centralized monitoring and management of Estonian energy infrastructure</p>
+            <hr class="my-4">
+            <p>Implementation of Estonian energy security strategy and efficient resource utilization</p>
+        </div>
+    </div>
+</div>
+
+{% if stats %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{ stats.total_stations }}</h5>
+                <p class="card-text">Total Stations</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-success">{{ stats.active_stations }}</h5>
+                <p class="card-text">Active</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-info">{{ "%.0f"|format(stats.total_capacity) }}</h5>
+                <p class="card-text">MW Capacity</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-warning">{{ stats.total_alerts }}</h5>
+                <p class="card-text">Alerts</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-industry text-primary"></i> Power Stations
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Monitoring of nuclear, thermal and renewable power plants</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Nuclear Power Plants</li>
+                    <li><i class="fas fa-check text-success"></i> Thermal Power Plants</li>
+                    <li><i class="fas fa-check text-success"></i> Hydroelectric Plants</li>
+                    <li><i class="fas fa-check text-success"></i> Renewable Sources</li>
+                </ul>
+                <a href="/stations" class="btn btn-primary">View Stations</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line text-success"></i> Energy Consumption
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Analysis of electricity consumption across Ukraine regions</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-chart-bar text-info"></i> Regional Statistics</li>
+                    <li><i class="fas fa-clock text-info"></i> Time Dynamics</li>
+                    <li><i class="fas fa-trending-up text-info"></i> Consumption Forecasts</li>
+                    <li><i class="fas fa-balance-scale text-info"></i> Energy Balance</li>
+                </ul>
+                <a href="/consumption" class="btn btn-success">View Consumption</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> System Alerts
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Monitoring of critical events and technical notifications</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-bell text-warning"></i> Emergency Situations</li>
+                    <li><i class="fas fa-tools text-warning"></i> Planned Maintenance</li>
+                    <li><i class="fas fa-shield-alt text-warning"></i> System Security</li>
+                    <li><i class="fas fa-info-circle text-warning"></i> Information Messages</li>
+                </ul>
+                <a href="/alerts" class="btn btn-warning">View Alerts</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-search"></i> Quick Search
+                </h6>
+            </div>
+            <div class="card-body">
+                <form action="/search" method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="q" placeholder="Search stations or locations...">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-shield-alt"></i> Security Status
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>System operating normally</span>
+                </div>
+                <div class="d-flex align-items-center mt-2">
+                    <i class="fas fa-lock text-primary me-2"></i>
+                    <span>Secure connection active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle"></i> System Information</h5>
+            <p class="mb-0">
+                The Estonia Energy System Management provides centralized monitoring 
+                and management of Estonian energy infrastructure. The system includes 
+                monitoring of power plants, energy consumption analysis, network load 
+                management and energy security assurance.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

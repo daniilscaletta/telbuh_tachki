@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - Estonia Energy System Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-search"></i> Search Results</h2>
+        <p class="text-muted">
+            Search query: <strong>"{{ query }}"</strong>
+        </p>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Search Statistics
+                </h6>
+                <p class="card-text">
+                    <strong>Results found:</strong> {{ results|length }}<br>
+                    <strong>Query:</strong> "{{ query }}"
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <a href="/search" class="btn btn-outline-primary">
+                    <i class="fas fa-search"></i> New Search
+                </a>
+                <a href="/stations" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-list"></i> All Stations
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% if error %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-danger">
+            <h5><i class="fas fa-exclamation-triangle"></i> SQL Error</h5>
+            <p class="mb-0"><strong>Error:</strong> {{ error }}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if results %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Found Power Stations
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Station Name</th>
+                                <th>Location</th>
+                                <th>Capacity (MW)</th>
+                                <th>Status</th>
+                                <th>Operator</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for station in results %}
+                            <tr>
+                                <td>{{ station[0] }}</td>
+                                <td>
+                                    <strong>{{ station[1] }}</strong>
+                                    {% if station[4] == 'Active' %}
+                                        <span class="badge bg-success ms-2">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-warning ms-2">{{ station[4] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ station[2] }}</td>
+                                <td>
+                                    <span class="fw-bold">{{ "%.0f"|format(station[3]) }}</span>
+                                </td>
+                                <td>
+                                    {% if station[4] == 'Active' %}
+                                        <i class="fas fa-check-circle text-success"></i> Active
+                                    {% else %}
+                                        <i class="fas fa-exclamation-triangle text-warning"></i> {{ station[4] }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ station[5] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle"></i> No Results Found</h5>
+            <p>No power stations found for your query "{{ query }}".</p>
+            <p>Try:</p>
+            <ul>
+                <li>Check spelling</li>
+                <li>Use more general terms</li>
+                <li>Search by operator name</li>
+            </ul>
+            <a href="/search" class="btn btn-primary">
+                <i class="fas fa-search"></i> Try Again
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+<script>
+function copyFlag() {
+    const flagInput = document.getElementById('flagValue');
+    flagInput.select();
+    flagInput.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand('copy');
+    alert('Flag copied: ' + flagInput.value);
+}
+</script>
+{% endblock %}

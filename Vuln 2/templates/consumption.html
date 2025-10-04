@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Energy Consumption - Estonia Energy System Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-chart-line"></i> Energy Consumption by Counties</h2>
+        <p class="text-muted">Analysis of electricity consumption across Estonian counties</p>
+    </div>
+</div>
+
+{% if stats %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{ "%.0f"|format(stats.total_consumption) }}</h5>
+                <p class="card-text">MWh Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-success">{{ consumption|length }}</h5>
+                <p class="card-text">Counties</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-info">{{ "%.1f"|format(stats.total_consumption / consumption|length) }}</h5>
+                <p class="card-text">MWh Average</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-warning">2.5</h5>
+                <p class="card-text">Peak/Valley Ratio</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> County Consumption
+                    </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>County</th>
+                                <th>Consumption (MWh)</th>
+                                <th>Percentage of Total</th>
+                                <th>Status</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total_consumption = consumption|sum(attribute='2') %}
+                            {% for item in consumption %}
+                            {% set percentage = (item[2] / total_consumption * 100) %}
+                            <tr>
+                                <td>
+                                    <strong>{{ item[1] }}</strong>
+                                </td>
+                                <td>
+                                    <span class="fw-bold">{{ "%.1f"|format(item[2]) }}</span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ percentage }}%" 
+                                             aria-valuenow="{{ percentage }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ "%.1f"|format(percentage) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if percentage > 20 %}
+                                        <span class="badge bg-danger">High</span>
+                                    {% elif percentage > 10 %}
+                                        <span class="badge bg-warning">Medium</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item[2] > (total_consumption / consumption|length) %}
+                                        <i class="fas fa-arrow-up text-danger"></i> Above Average
+                                    {% else %}
+                                        <i class="fas fa-arrow-down text-success"></i> Below Average
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Top 3 Counties
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for item in consumption[:3] %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{ item[1] }}</span>
+                    <span class="badge bg-primary">{{ "%.1f"|format(item[2]) }} MWh</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">
+                    Data is updated in real-time based on meter readings 
+                    and sensors in Estonia's energy system.
+                </p>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-clock text-info me-2"></i>
+                    <span class="small">Last update: Real-time</span>
+                </div>
+                <div class="d-flex align-items-center mt-2">
+                    <i class="fas fa-chart-line text-success me-2"></i>
+                    <span class="small">Data source: County meters</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

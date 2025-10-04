@@ -1,0 +1,9 @@
+
+services:
+  panel:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    restart: unless-stopped

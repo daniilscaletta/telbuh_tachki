@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="grid">
+  <!-- Левая колонка: объекты, управление и админпанель -->
+  <section class="panel left">
+    <h2>Об'єкти та їх статус</h2>
+    <div class="where">Де і що працює: карта-зведення за локаціями</div>
+    <ul id="device-list">
+      {% for d in devices %}
+      <li class="device" data-id="{{ d.id }}">
+        <div class="title">{{ d.name }}</div>
+        <div class="meta">{{ d.kind }} • Роль: {{ d.role }} • Локація: {{ d.location }}</div>
+        <div class="status-row">
+          <div>Статус: <span class="status {{ d.status }}">{{ d.status }}</span></div>
+          <div class="load">Навантаження: <span class="loadval">{{ d.load }}</span>%</div>
+        </div>
+        <div class="extra" id="extra-{{ d.id }}">
+          {% if d.extra %}
+            {% for k,v in d.extra.items() %}
+              <div class="kv"><b>{{ k }}:</b> {{ v }}</div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="control-panel">
+      <h3>Панель ручного управління</h3>
+
+      <form id="op-form">
+        <label>Ключ управління:
+          <input id="token" type="password" value="" placeholder="вставте ключ управління" autocomplete="off">
+        </label>
+      
+        <label>Виберіть об'єкт для регулювання:
+          <select id="target" disabled>
+            <option value="" disabled selected>Виберіть пристрій</option>
+            {% for d in devices %}
+              <option value="{{ d.id }}">{{ d.name }} — {{ d.location }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <div id="control-sliders" style="display:none;">
+          <div class="control-group">
+            <label>Потужність генерації (МВт):</label>
+            <input type="range" min="0" max="100" value="75" class="slider" id="powerSlider">
+            <span id="powerValue">75%</span>
+          </div>
+          <div class="control-group">
+            <label>Напруга мережі (кВ):</label>
+            <input type="range" min="0" max="100" value="50" class="slider" id="voltageSlider">
+            <span id="voltageValue">50%</span>
+          </div>
+        </div>
+
+        <button type="submit" id="op-submit">Відкрити панель управління</button>
+      </form>
+     
+      <div id="op-result" class="result"></div>
+    </div>
+
+    <!-- Панель адміністратора: залишено тільки поле та кнопка "Вставити ключ" -->
+    <h3>Панель адміністратора (навчальна вразливість)</h3>
+    <div class="admin-panel">
+      <p class="warning">УВАГА: Для доступу до цих функцій потрібен ключ адміністратора.
+        Неправильне використання може призвести до порушення роботи системи!</p>
+     
+      <label>Ключ адміністратора:
+        <input id="admin-token" type="password" placeholder="введіть ключ адміністратора" autocomplete="off">
+      </label>
+     
+      <button id="insert-admin-key" class="btn">Вставити ключ</button>
+      <div id="admin-token-result" class="result"></div>
+
+      <div class="admin-commands" aria-disabled="true" style="pointer-events:none; opacity:0.5;">
+        <button data-command="shutdown" class="admin-btn btn-red">АВАРІЙНЕ ВІДКЛЮЧЕННЯ</button>
+        <button data-command="isolate" class="admin-btn btn-red">ІЗОЛЮВАТИ ПІДСТАНЦІЮ</button>
+        <button data-command="compromise_all" class="admin-btn btn-red">СКОМПРОМЕТУВАТИ ВСЕ</button>
+      </div>
+     
+      <div id="admin-result" class="result"></div>
+    </div>
+  </section>
+
+  <!-- Права колонка: графіки та логи -->
+  <section class="panel right">
+    <div class="chart-row">
+      <div class="chart-container">
+        <h3>Навантаження системи</h3>
+        <canvas id="loadChart" height="120"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Статус об'єктів</h3>
+        <canvas id="statusChart" height="120"></canvas>
+      </div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-container">
+        <h3>Потужність генерації</h3>
+        <canvas id="powerChart" height="120"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Температури обладнання</h3>
+        <canvas id="tempChart" height="120"></canvas>
+      </div>
+    </div>
+    <h3>Логи інцидентів</h3>
+    <div id="incident-log" class="log"></div>
+  </section>
+</div>
+<script>
+  window.START_DEVICES = {{ devices_json | safe }};
+  window.SIMULATION_MODE = {{ 'true' if simulate_allowed else 'false' }};
+</script>
+{% endblock %}
+

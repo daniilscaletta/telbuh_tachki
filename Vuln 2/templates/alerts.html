@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}System Alerts - Estonia Energy System Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-exclamation-triangle"></i> System Alerts</h2>
+        <p class="text-muted">Monitoring of critical events and technical notifications in the energy system</p>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-danger">
+                    <i class="fas fa-exclamation-circle"></i> {{ alerts|selectattr('1', 'equalto', 'Critical')|list|length }}
+                </h5>
+                <p class="card-text">Critical</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-warning">
+                    <i class="fas fa-exclamation-triangle"></i> {{ alerts|selectattr('1', 'equalto', 'Warning')|list|length }}
+                </h5>
+                <p class="card-text">Warnings</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-info">
+                    <i class="fas fa-info-circle"></i> {{ alerts|selectattr('1', 'equalto', 'Information')|list|length }}
+                </h5>
+                <p class="card-text">Information</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-primary">
+                    <i class="fas fa-list"></i> {{ alerts|length }}
+                </h5>
+                <p class="card-text">Total</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Alerts List
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if alerts %}
+                <div class="list-group list-group-flush">
+                    {% for alert in alerts %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <div class="d-flex align-items-start">
+                                {% if alert[1] == 'Critical' %}
+                                    <i class="fas fa-exclamation-circle text-danger me-3 mt-1"></i>
+                                {% elif alert[1] == 'Warning' %}
+                                    <i class="fas fa-exclamation-triangle text-warning me-3 mt-1"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle text-info me-3 mt-1"></i>
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-1">
+                                        {% if alert[1] == 'Critical' %}
+                                            <span class="badge bg-danger me-2">Critical</span>
+                                        {% elif alert[1] == 'Warning' %}
+                                            <span class="badge bg-warning me-2">Warning</span>
+                                        {% else %}
+                                            <span class="badge bg-info me-2">Information</span>
+                                        {% endif %}
+                                        {{ alert[1] }}
+                                    </h6>
+                                    <p class="mb-1">{{ alert[2] }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ alert[4] }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                {% if alert[3] == 'High' %}
+                                    <span class="badge bg-danger">High</span>
+                                {% elif alert[3] == 'Medium' %}
+                                    <span class="badge bg-warning">Medium</span>
+                                {% else %}
+                                    <span class="badge bg-success">Low</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">No Active Alerts</h5>
+                    <p class="text-muted">System operating normally</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-shield-alt"></i> Security Status
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span>Monitoring system active</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-bell text-primary me-2"></i>
+                    <span>Automatic notifications enabled</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-clock text-info me-2"></i>
+                    <span>Updates every 30 seconds</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-cog"></i> Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-outline-primary btn-sm me-2" onclick="refreshAlerts()">
+                    <i class="fas fa-refresh"></i> Refresh
+                </button>
+                <button class="btn btn-outline-success btn-sm me-2" onclick="markAllRead()">
+                    <i class="fas fa-check"></i> Mark All Read
+                </button>
+                <button class="btn btn-outline-warning btn-sm me-2" onclick="filterAlerts('critical')">
+                    <i class="fas fa-exclamation-circle"></i> Critical Only
+                </button>
+                <button class="btn btn-outline-info btn-sm me-2" onclick="filterAlerts('all')">
+                    <i class="fas fa-list"></i> All Alerts
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="clearHistory()">
+                    <i class="fas fa-trash"></i> Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshAlerts() {
+    location.reload();
+}
+
+function markAllRead() {
+    // Simulate marking all as read
+    const alerts = document.querySelectorAll('.list-group-item');
+    alerts.forEach(alert => {
+        alert.style.opacity = '0.6';
+        alert.style.backgroundColor = '#f8f9fa';
+    });
+    
+    // Show notification
+    showNotification('All alerts marked as read', 'success');
+}
+
+function filterAlerts(type) {
+    const alerts = document.querySelectorAll('.list-group-item');
+    
+    alerts.forEach(alert => {
+        if (type === 'all') {
+            alert.style.display = 'block';
+        } else if (type === 'critical') {
+            const isCritical = alert.querySelector('.badge.bg-danger');
+            alert.style.display = isCritical ? 'block' : 'none';
+        }
+    });
+    
+    showNotification(`Filter: ${type === 'all' ? 'All alerts' : 'Critical only'}`, 'info');
+}
+
+function clearHistory() {
+    if (confirm('Are you sure you want to clear alert history?')) {
+        // Simulate clearing history
+        const alertsContainer = document.querySelector('.list-group');
+        alertsContainer.innerHTML = '<div class="text-center py-5"><i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i><h5 class="mt-3">History Cleared</h5><p class="text-muted">No active alerts</p></div>';
+        showNotification('Alert history cleared', 'warning');
+    }
+}
+
+function showNotification(message, type) {
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+</script>
+{% endblock %}

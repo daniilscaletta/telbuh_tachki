@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Power Stations - Estonia Energy System Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-industry"></i> Estonian Power Stations</h2>
+        <p class="text-muted">Monitoring of Estonian power plants and their technical characteristics</p>
+    </div>
+</div>
+
+{% if stats %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{ stats.total_stations }}</h5>
+                <p class="card-text">Total Stations</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-success">{{ stats.active_stations }}</h5>
+                <p class="card-text">Active</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-info">{{ "%.0f"|format(stats.total_capacity) }}</h5>
+                <p class="card-text">MW Total Capacity</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-warning">{{ "%.1f"|format(stats.total_capacity / stats.total_stations) }}</h5>
+                <p class="card-text">MW Average</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-chart-pie"></i> Statistics
+                </h6>
+                <p class="card-text">
+                    <strong>Total Stations:</strong> {{ stations|length }}<br>
+                    <strong>Active:</strong> {{ stations|selectattr('4', 'equalto', 'Active')|list|length }}<br>
+                    <strong>Total Capacity:</strong> {{ "%.0f"|format(stats.total_capacity) }} MW
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-search"></i> Search Station
+                </h6>
+                <form action="/search" method="post">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="query" placeholder="Station name or location...">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Power Stations List
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Station Name</th>
+                                <th>Location</th>
+                                <th>Capacity (MW)</th>
+                                <th>Status</th>
+                                <th>Operator</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for station in stations %}
+                            <tr>
+                                <td>{{ station[0] }}</td>
+                                <td>
+                                    <strong>{{ station[1] }}</strong>
+                                    {% if station[4] == 'Активна' %}
+                                        <span class="badge bg-success ms-2">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-warning ms-2">{{ station[4] }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ station[2] }}</td>
+                                <td>
+                                    <span class="fw-bold">{{ "%.0f"|format(station[3]) }}</span>
+                                </td>
+                                <td>
+                                    {% if station[4] == 'Активна' %}
+                                        <i class="fas fa-check-circle text-success"></i> Active
+                                    {% else %}
+                                        <i class="fas fa-exclamation-triangle text-warning"></i> {{ station[4] }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ station[5] }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="viewStation({{ station[0] }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-info" onclick="editStation({{ station[0] }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewStation(id) {
+    alert('Viewing station details ID: ' + id);
+}
+
+function editStation(id) {
+    alert('Editing station ID: ' + id);
+}
+</script>
+{% endblock %}

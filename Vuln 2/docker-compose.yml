@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  ukr-energy-system:
+    build: .
+    container_name: ukr-energy-system-container
+    ports:
+      - "9000:9000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=9000
+      - DEBUG=False
+      - DATABASE_URL=energy_system.db
+      - SECRET_KEY=ukr_energy_system_2024_secret_key
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.docker.compose.project=ukr-energy-system"
+      - "com.docker.compose.service=ukr-energy-system"
+
+networks:
+  default:
+    name: ukr-energy-network
