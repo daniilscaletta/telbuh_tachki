@@ -34,7 +34,7 @@ echo "📦 Сборка Docker образа..."
 docker-compose build
 
 echo "🚀 Запуск системы..."
-docker-compose up -d
+docker-compose up
 
 echo ""
 echo "✅ Система запущена!"

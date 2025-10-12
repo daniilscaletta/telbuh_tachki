@@ -24,6 +24,12 @@ document.addEventListener("DOMContentLoaded", ()=> {
   let controlPanelOpen = false;
 
   // Ініціалізація графіків (Chart.js)
+  // Перевіряємо, що Chart.js завантажений
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js не завантажений!');
+    return;
+  }
+  
   const loadCtx = document.getElementById("loadChart").getContext("2d");
   const statusCtx = document.getElementById("statusChart").getContext("2d");
   const powerCtx = document.getElementById("powerChart").getContext("2d");
@@ -37,7 +43,13 @@ document.addEventListener("DOMContentLoaded", ()=> {
         label: 'Навантаження',
         data: devices.map(d=>d.load),
         fill: true,
-        tension: 0.3
+        tension: 0.3,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        pointBackgroundColor: 'rgb(75, 192, 192)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgb(75, 192, 192)'
       }]
     },
     options: {animation:false, plugins:{legend:{display:false}}, scales:{y:{min:0,max:120}}}
@@ -48,7 +60,16 @@ document.addEventListener("DOMContentLoaded", ()=> {
     data: {
       labels: ['OK', 'WARNING', 'OFFLINE', 'DEGRADED', 'COMPROMISED'],
       datasets: [{
-        data: [0, 0, 0, 0, 0]
+        data: [0, 0, 0, 0, 0],
+        backgroundColor: [
+          'rgb(40, 199, 111)',  // OK - зеленый
+          'rgb(255, 159, 67)',  // WARNING - оранжевый
+          'rgb(107, 114, 128)', // OFFLINE - серый
+          'rgb(255, 193, 7)',   // DEGRADED - желтый
+          'rgb(255, 92, 77)'    // COMPROMISED - красный
+        ],
+        borderColor: '#fff',
+        borderWidth: 2
       }]
     },
     options: {animation:false, plugins:{legend:{display:true}}}
@@ -61,6 +82,9 @@ document.addEventListener("DOMContentLoaded", ()=> {
       datasets: [{
         label: 'Потужність',
         data: devices.map(d=>d.power_level || 75),
+        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+        borderColor: 'rgb(54, 162, 235)',
+        borderWidth: 1
       }]
     },
     options: {animation:false, plugins:{legend:{display:false}}, scales:{y:{min:0,max:100}}}
@@ -74,7 +98,13 @@ document.addEventListener("DOMContentLoaded", ()=> {
         label: 'Температура',
         data: devices.map(d=>d.temperature || 35),
         fill: true,
-        tension: 0.3
+        tension: 0.3,
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        pointBackgroundColor: 'rgb(255, 99, 132)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgb(255, 99, 132)'
       }]
     },
     options: {animation:false, plugins:{legend:{display:false}}, scales:{y:{min:0,max:80}}}
