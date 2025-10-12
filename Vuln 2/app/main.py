@@ -22,8 +22,9 @@ app = FastAPI(
 )
 
 # Підключення статичних файлів
-if os.path.exists("app/static"):
-    app.mount("/static", StaticFiles(directory="app/static"), name="static")
+static_path = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_path):
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 # Підключення маршрутів
 app.include_router(main_routes.router)

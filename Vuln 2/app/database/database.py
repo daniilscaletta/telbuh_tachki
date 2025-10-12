@@ -5,9 +5,20 @@ from app.models.energy_models import PowerStation, EnergyConsumption, SystemAler
 
 def read_flag():
     """Читает флаг из файла"""
-    flag_file_path = "/app/flag/flag"
-    with open(flag_file_path, 'r') as f:
-        return f.read().strip()
+    # Попробуем найти флаг в разных местах
+    possible_paths = [
+        "/app/flag/flag",
+        "app/flag/flag",
+        "flag/flag"
+    ]
+    
+    for flag_file_path in possible_paths:
+        if os.path.exists(flag_file_path):
+            with open(flag_file_path, 'r') as f:
+                return f.read().strip()
+    
+    # Если флаг не найден, возвращаем тестовый
+    return "FLAG_NOT_FOUND"
 
 class DatabaseManager:
     """Менеджер базы данных для системы управления энергосистемой"""
